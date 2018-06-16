@@ -49,9 +49,8 @@ class ChessBoard:
         # player vs. player, player vs. computer, computer vs. computer(this will turn into training process in future)
         self.mode = p1, p2
 
-        self.freeze = False  # TODO: use freeze in other functions
+        self.freeze = False
 
-    # TODO: Some issues here
     def win_determine(
         self, x: Union[int, None] = None, y: Union[int, None] = None
     ) -> int:
@@ -154,9 +153,29 @@ class ChessBoard:
                 return False
         return True
 
+    def evaluate(self, player: int) -> int:
+        """
+        Evaluate the situation on chessboard for one player, calculate an int as the result.
+        :param player: 1 for black and 2 for white
+        :return: Current situation. Bigger the outcome, more favourable the situation to the player
+        """
+        # TODO
+        standard = {
+            "5+": 100000,  # live 5
+            "4+": 10000,  # live 4
+            "3+": 1000,  # live 3
+            "2+": 100,  # live 2
+            "1+": 10,  # live 1
+
+            "4-": 1000,  # dead 4
+            "3-": 100,  # dead 3
+            "2-": 10  # dead 2
+        }
+        return 0
+
     def __repr__(self):
         """
-        Should output x and y reversely, since they stored differently in self.board
+        Should output x and y reversely, since they are stored differently in self.board
         """
         out = "   "
         for x in range(self.size[0]):
@@ -272,7 +291,6 @@ class ChessBoardInterface:
         self.boardFrame.pack()
 
     def mouse_click(self, click):
-        # TODO：Add freeze control
         x, y = self._nearest_position(click)
         converted_coo = self.convert_coordinate(x, y)
 
@@ -353,13 +371,13 @@ class ChessBoardInterface:
             return (x + 1) * 25, (y + 1) * 25
 
     def _init_menu(self):
-        menu = Menu(self.root)
+        menu = Menu(self.root, tearoff=0)
         self.root.config(menu=menu)
         game_menu = Menu(menu)
         game_menu.add_command(label="New game", command=self.restart_game)
         game_menu.add_command(label="Withdraw", command=self.withdraw)
         game_menu.add_command(label="Exit", command=self.root.destroy)
-        menu.add_cascade(label="File", menu=game_menu)
+        menu.add_cascade(label="Game", menu=game_menu)
 
     def _draw_label(self):
         for x in range(15):
@@ -386,7 +404,10 @@ class ChessBoardInterface:
         bd.root.mainloop()
 
     def withdraw(self):
-        # TODO: complete withdraw function
+        # Check if the chessboard is frozen
+        if self.chessBoard.freeze:
+            return
+
         withdraw_gen = self.chessBoard.withdraw()
         last_chess = next(withdraw_gen)
         player, position = last_chess
