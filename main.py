@@ -1,9 +1,10 @@
+import time
 from collections import namedtuple
 from tkinter import *
 from tkinter.ttk import *
 from typing import Tuple, Union
 
-from ai import min_max_search
+from ai import min_max_search, points_gen
 from board import ChessBoard, format_number
 from constants import *
 
@@ -16,6 +17,8 @@ class ChessBoardInterface:
         self.root = Tk()
         self.root.resizable(width=FALSE, height=FALSE)
         self.root.title("GoBang")
+
+        self.button_freeze = False
 
         # Total chessboard
         self.boardFrame = Frame(self.root)
@@ -75,17 +78,29 @@ class ChessBoardInterface:
         """
         Call min_max search in ai.py to find the best place to set chess
         """
-        print("Perform AI Evaluate!")
-        position = min_max_search(self.chessBoard, self.chessBoard.next_turn, depth=6)
+        if self.button_freeze:
+            return
+        print("Perform AI Evaluate!", end=" ")
+        self.chessBoard.freeze = True
+        self.button_freeze = True
+
+        bar = Bar(len(points_gen(self.chessBoard)))
+        position = min_max_search(self.chessBoard, self.chessBoard.next_turn, bar, depth=8)
+
         print(position)
         position = self.convert_coordinate(position[0], position[1])
         temp_coo = namedtuple("Coordinate", ['x', 'y'])
+
+        self.chessBoard.freeze = False
+        self.button_freeze = False
         self.mouse_click(temp_coo(position[0], position[1]))
 
     def button_evaluate(self):
         """
         Evaluate and score the situation on chessboard for both players
         """
+        if self.button_freeze:
+            return
         print("Perform evaluate!")
         self.score1["text"] = "Black: {}".format(self.chessBoard.evaluate(1))
         self.score2["text"] = "White: {}".format(self.chessBoard.evaluate(2))
@@ -149,6 +164,8 @@ class ChessBoardInterface:
             # Restart game
             if ok_window.final_restart:
                 self.restart_game()
+
+        self.button_evaluate()
         # print(self.chessBoard)
 
     def _nearest_position(self, click) -> Tuple[int, int]:
@@ -207,7 +224,7 @@ class ChessBoardInterface:
 
     def withdraw(self):
         # Check if the chessboard is frozen
-        if self.chessBoard.freeze:
+        if self.chessBoard.freeze or self.button_freeze:
             return
 
         withdraw_gen = self.chessBoard.withdraw()
@@ -224,6 +241,29 @@ class ChessBoardInterface:
 
         # Delete picture
         self.mainBoard.delete(self.operate.pop())
+
+
+class Bar:
+    def __init__(self, length: int):
+        self.root = Tk()
+        self.root.title("Ai calculating...")
+
+        Label(self.root, text="Plz wait for seconds, ai is calculating...").pack()
+
+        self.bar = Progressbar(self.root, maximum=length)
+        self.bar.pack()
+
+        self.start_time = time.time()
+        self.time_frame = Label(self.root, text="Total time: 0s")
+        self.time_frame.pack()
+
+    def step_in(self):
+        self.bar.step(1)
+        self.time_frame["text"] = "Total time: {}s".format(int(time.time() - self.start_time))
+        self.root.update()
+
+    def exit(self):
+        self.root.destroy()
 
 
 class OkWindow:

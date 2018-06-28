@@ -1,27 +1,38 @@
-from random import sample
+from random import sample, randint
 from typing import Tuple
-
-import tqdm
 
 from board import ChessBoard
 
 
-def min_max_search(board: ChessBoard, ai_num: int, depth: int = 4) -> Tuple[int, int]:
+def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
     """
     Min-max search to find the best place of setting chess
+    :param control_bar: class Bar from main.py
     :param ai_num: The player number which ai is
     :param board: chessboard
     :param depth: depth of calculation NOTE: GREAT NUMBER OF DEPTH MAY SPEND A LONG TIME
     :return: the coordinate of best position
     """
+    # If the board is empty
+    for x in board.board:
+        for y in x:
+            if y != 0:
+                break
+        else:
+            continue
+        break
+    else:
+        control_bar.exit()
+        return randint(5, 9), randint(5, 9)
+
     max_v = -99999999
     points = points_gen(board)
     candidates = []
 
     # Show progress bar
-    bar = tqdm.tqdm(total=len(points))
     for point in points:
-        bar.update(1)
+        control_bar.step_in()
+
         board.board[point[0]][point[1]] = ai_num
         cur_v = evaluate_point(board, ai_num, 1 if ai_num == 2 else 2, depth, -999999999, 999999999)
         if cur_v == max_v:
@@ -30,7 +41,9 @@ def min_max_search(board: ChessBoard, ai_num: int, depth: int = 4) -> Tuple[int,
             max_v = cur_v
             candidates = [point]
         board.board[point[0]][point[1]] = 0
-    return sample(candidates, 1)[0]
+    result = sample(candidates, 1)[0]
+    control_bar.exit()
+    return result
 
 
 def evaluate_point(board: ChessBoard, ai_num: int, player: int, depth: int, alpha: int, beta: int):
