@@ -47,6 +47,8 @@ class ChessBoardInterface:
 
         # Create control frame
         self.controlFrame = Labelframe(self.root, text="Control Panel")
+        self.turn = Label(self.controlFrame, text="Next player: black")
+        self.turn.pack(pady=10)
         # Evaluate part
         self.score1 = Label(self.controlFrame, text="Black: ")
         self.score2 = Label(self.controlFrame, text="White: ")
@@ -54,7 +56,9 @@ class ChessBoardInterface:
             self.controlFrame, text="Evaluate", command=self.button_evaluate
         )
         # AI part
-        self.aiCalculateButton = Button(self.controlFrame, text="AI Calculate (beta)", command=self.ai_calculate)
+        self.aiCalculateButton = Button(
+            self.controlFrame, text="AI Calculate (beta)", command=self.ai_calculate
+        )
         self.score1.pack()
         self.score2.pack()
         self.evaluateButton.pack()
@@ -72,7 +76,7 @@ class ChessBoardInterface:
         self.mainBoard.grid(row=1, column=1, padx=0, pady=0)
         self.boardFrame.grid()
         # Some bugs here, cannot click canvas after click button....
-        self.controlFrame.grid(row=0, column=1)
+        self.controlFrame.grid(row=0, column=1, padx=5)
 
     def ai_calculate(self):
         """
@@ -81,15 +85,19 @@ class ChessBoardInterface:
         if self.button_freeze:
             return
         print("Perform AI Evaluate!", end=" ")
+        start_time = time.time()
         self.chessBoard.freeze = True
         self.button_freeze = True
 
         bar = Bar(len(points_gen(self.chessBoard)))
-        position = min_max_search(self.chessBoard, self.chessBoard.next_turn, bar, depth=8)
+        position = min_max_search(
+            self.chessBoard, self.chessBoard.next_turn, bar, depth=8
+        )
 
         print(position)
         position = self.convert_coordinate(position[0], position[1])
-        temp_coo = namedtuple("Coordinate", ['x', 'y'])
+        temp_coo = namedtuple("Coordinate", ["x", "y"])
+        print("Used time: {}".format(round(time.time() - start_time, 3)))
 
         self.chessBoard.freeze = False
         self.button_freeze = False
@@ -165,6 +173,10 @@ class ChessBoardInterface:
             if ok_window.final_restart:
                 self.restart_game()
 
+        # Update gui
+        self.turn["text"] = "Next player: {}".format(
+            "black" if self.chessBoard.next_turn == 1 else "white"
+        )
         self.button_evaluate()
         # print(self.chessBoard)
 
@@ -260,7 +272,9 @@ class Bar:
 
     def step_in(self):
         self.bar.step(1)
-        self.time_frame["text"] = "Total time: {}s".format(int(time.time() - self.start_time))
+        self.time_frame["text"] = "Total time: {}s".format(
+            int(time.time() - self.start_time)
+        )
         self.root.update()
 
     def exit(self):

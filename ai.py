@@ -34,7 +34,9 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
         control_bar.step_in()
 
         board.board[point[0]][point[1]] = ai_num
-        cur_v = evaluate_point(board, ai_num, 1 if ai_num == 2 else 2, depth, -999999999, 999999999)
+        cur_v = evaluate_point(
+            board, ai_num, 1 if ai_num == 2 else 2, depth, -999999999, 999999999
+        )
         if cur_v == max_v:
             candidates.append(point)
         elif cur_v > max_v:
@@ -46,7 +48,9 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
     return result
 
 
-def evaluate_point(board: ChessBoard, ai_num: int, player: int, depth: int, alpha: int, beta: int):
+def evaluate_point(
+        board: ChessBoard, ai_num: int, player: int, depth: int, alpha: int, beta: int
+):
     """
     This function use alpha-beta pruning to calculate best-fit point
     :param board: chessboard
@@ -68,7 +72,14 @@ def evaluate_point(board: ChessBoard, ai_num: int, player: int, depth: int, alph
         max_v = -99999999
         for point in points:
             board.board[point[0]][point[1]] = player
-            cur_v = evaluate_point(board, ai_num, 1 if player == 2 else 2, depth - 1, alpha, max(beta, max_v))
+            cur_v = evaluate_point(
+                board,
+                ai_num,
+                1 if player == 2 else 2,
+                depth - 1,
+                alpha,
+                max(beta, max_v),
+            )
             board.board[point[0]][point[1]] = 0
             max_v = max(max_v, cur_v)
             # Prune
@@ -80,7 +91,14 @@ def evaluate_point(board: ChessBoard, ai_num: int, player: int, depth: int, alph
         min_v = 9999999999
         for point in points:
             board.board[point[0]][point[1]] = player
-            cur_v = evaluate_point(board, ai_num, 1 if player == 2 else 2, depth - 1, min(alpha, min_v), beta)
+            cur_v = evaluate_point(
+                board,
+                ai_num,
+                1 if player == 2 else 2,
+                depth - 1,
+                min(alpha, min_v),
+                beta,
+            )
             board.board[point[0]][point[1]] = 0
             min_v = min(min_v, cur_v)
             # Prune
@@ -129,8 +147,8 @@ def has_neighbor(board: ChessBoard, point: Tuple[int, int], depth: int) -> bool:
     return False
 
 
-if __name__ == '__main__':
-    a = ChessBoard('p', 'p')
+if __name__ == "__main__":
+    a = ChessBoard("p", "p")
     a.set_chess(4, 6)
     print(has_neighbor(a, (3, 4), depth=2))
     print(points_gen(a))
