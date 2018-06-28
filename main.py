@@ -2,18 +2,10 @@ from tkinter import *
 from tkinter.ttk import *
 from typing import Tuple, Union
 
-from board import ChessBoard
+from board import ChessBoard, format_number
 from constants import *
 
 sys.setrecursionlimit(100000)
-
-
-def format_number(num: int, format_length: int = 2) -> str:
-    if len(str(num)) == format_length:
-        return str(num)
-    else:
-        out = "0" * (format_length - len(str(num)))
-        return out + str(num)
 
 
 class ChessBoardInterface:
@@ -48,6 +40,19 @@ class ChessBoardInterface:
         self.operate = []
         # print(self.all_positions)
 
+        # Create control frame
+        self.controlFrame = Labelframe(self.root, text="Control Panel")
+        self.score1 = Label(self.controlFrame, text="Black: ")
+        self.score2 = Label(self.controlFrame, text="White: ")
+
+        self.evaluateButton = Button(
+            self.controlFrame, text="Evaluate", command=self.button_evaluate
+        )
+
+        self.score1.pack()
+        self.score2.pack()
+        self.evaluateButton.pack()
+
         # Create Label frames
         self.horLabel = Frame(self.boardFrame)
         self.verLabel = Frame(self.boardFrame)
@@ -58,7 +63,18 @@ class ChessBoardInterface:
             self.horLabel.grid(row=0, column=1, pady=0)
             self.verLabel.grid(row=1, column=0, padx=0)
         self.mainBoard.grid(row=1, column=1, padx=0, pady=0)
-        self.boardFrame.pack()
+        self.boardFrame.grid()
+        # Some bugs here, cannot click canvas after click button....
+        self.controlFrame.grid(row=0, column=1)
+
+    def button_evaluate(self):
+        """
+        Evaluate and score the situation on chessboard for both players
+        """
+        print("Perform evaluate!")
+        self.score1["text"] = "Black: {}".format(self.chessBoard.evaluate(1))
+        self.score2["text"] = "White: {}".format(self.chessBoard.evaluate(2))
+        self.root.update()
 
     def mouse_click(self, click):
         x, y = self._nearest_position(click)
@@ -145,6 +161,7 @@ class ChessBoardInterface:
         self.root.config(menu=menu)
         game_menu = Menu(menu)
         game_menu.add_command(label="New game", command=self.restart_game)
+        # game_menu.add_command(label="Evaluate", command=self.button_evaluate)
         game_menu.add_command(label="Withdraw", command=self.withdraw)
         game_menu.add_command(label="Exit", command=self.root.destroy)
         menu.add_cascade(label="Game", menu=game_menu)

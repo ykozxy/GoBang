@@ -2,7 +2,49 @@ import copy
 from typing import List, Tuple, Union
 
 from constants import *
-from main import format_number
+
+
+def format_number(num: int, format_length: int = 2) -> str:
+    if len(str(num)) == format_length:
+        return str(num)
+    else:
+        out = "0" * (format_length - len(str(num)))
+        return out + str(num)
+
+
+def fit_pattern(sequence: list, pattern: tuple, margin_effect: bool = True) -> int:
+    """
+    Find the number of patterns appear in sequence
+    :param margin_effect: Whether the margin of board will be consider as an obstacle when calculate
+    :param sequence: The main sequence
+    :param pattern: Pattern in the object sequence
+    :return: The number of patterns appear in the sequence
+    """
+    sequence = sequence[:]
+    if margin_effect:
+        # If consider margin effect, add opposite player to the start end end of the sequence
+        main_player = 0
+        for each in pattern:
+            if each != 0:
+                main_player = each
+                break
+        assert main_player != 0  # Debug use
+        add_player = 1 if main_player == 2 else 2
+        sequence.insert(0, add_player)
+        sequence.append(add_player)
+
+    main_length = len(sequence)
+    sub_length = len(pattern)
+    if main_length < sub_length:
+        return 0
+    elif main_length == sub_length:
+        return 1 if sequence == list(pattern) else 0
+    else:
+        count = 0
+        for start in range(main_length - sub_length + 1):
+            if sequence[start: start + sub_length] == list(pattern):
+                count += 1
+        return count
 
 
 class ChessBoard:
@@ -200,20 +242,21 @@ class ChessBoard:
         This generator split board vertically, horizontally and diagonally into one-dimension arrays
         :return: Yield all split arrays one by one
         """
-        yield from self.board
-        for index, _ in enumerate(self.board):
-            yield [self.board[x][index] for x in range(15)]
+        new_board = self.get_board()
+        yield from self.board[:]
+        for index, _ in enumerate(self.board[:]):
+            yield [new_board[x][index] for x in range(15)]
         # Diagonal
         for base in range(29):
             yield [
-                self.board[x][base - x]
+                new_board[x][base - x]
                 for x in range(
                     0 if base <= 14 else base - 14, base + 1 if base <= 14 else 15
                 )
             ]
         for diff in range(-14, 15):
             yield [
-                self.board[x][x + diff]
+                new_board[x][x + diff]
                 for x in range(
                     abs(diff) if diff < 0 else 0, 15 if diff < 0 else 15 - diff
                 )
@@ -237,13 +280,92 @@ class ChessBoard:
             "3-": 100,  # dead 3
             "2-": 10,  # dead 2
         }
+        # Store all patterns
+        # Usage: patterns[type][player] -> List[tuple]
+        patterns = {
+            "5+": {1: [(1, 1, 1, 1, 1)], 2: [(2, 2, 2, 2, 2)]},
+            "4+": {1: [(0, 1, 1, 1, 1, 0)], 2: [(0, 2, 2, 2, 2, 0)]},
+            "3+": {
+                1: [(0, 1, 1, 1, 0), (0, 1, 0, 1, 1, 0), (0, 1, 1, 0, 1, 0)],
+                2: [(0, 2, 2, 2, 0), (0, 2, 0, 2, 2, 0), (0, 2, 2, 0, 2, 0)],
+            },
+            "2+": {
+                1: [(0, 0, 1, 1, 0, 0), (0, 1, 0, 1, 0), (0, 1, 0, 0, 1, 0)],
+                2: [(0, 0, 2, 2, 0, 0), (0, 2, 0, 2, 0), (0, 2, 0, 0, 2, 0)],
+            },
+            "1+": {1: [(0, 1, 0)], 2: [(0, 2, 0)]},
+            "4-": {
+                1: [
+                    (0, 1, 1, 1, 1, 2),
+                    (2, 1, 1, 1, 1, 0),
+                    (0, 1, 0, 1, 1, 1, 0),
+                    (0, 1, 1, 1, 0, 1, 0),
+                    (0, 1, 1, 0, 1, 1, 0),
+                ],
+                2: [
+                    (0, 2, 2, 2, 2, 1),
+                    (1, 2, 2, 2, 2, 0),
+                    (0, 2, 0, 2, 2, 2, 0),
+                    (0, 2, 2, 2, 0, 2, 0),
+                    (0, 2, 2, 0, 2, 2, 0),
+                ],
+            },
+            "3-": {
+                1: [
+                    (0, 0, 1, 1, 1, 2),
+                    (2, 1, 1, 1, 0, 0),
+                    (0, 1, 0, 1, 1, 2),
+                    (2, 1, 1, 0, 1, 0),
+                    (0, 1, 1, 0, 1, 2),
+                    (2, 1, 0, 1, 1, 0),
+                    (0, 1, 0, 0, 1, 1, 0),
+                    (0, 1, 1, 0, 0, 1, 0),
+                    (0, 1, 0, 1, 0, 1, 0),
+                    (2, 0, 1, 1, 1, 0, 2),
+                ],
+                2: [
+                    (0, 0, 2, 2, 2, 1),
+                    (1, 2, 2, 2, 0, 0),
+                    (0, 2, 0, 2, 2, 1),
+                    (1, 2, 2, 0, 2, 0),
+                    (0, 2, 2, 0, 2, 1),
+                    (1, 2, 0, 2, 2, 0),
+                    (0, 2, 0, 0, 2, 2, 0),
+                    (0, 2, 2, 0, 0, 2, 0),
+                    (0, 2, 0, 2, 0, 2, 0),
+                    (1, 0, 2, 2, 2, 0, 1),
+                ],
+            },
+            "2-": {
+                1: [
+                    (0, 0, 0, 1, 1, 0),
+                    (0, 1, 1, 0, 0, 0),
+                    (0, 0, 1, 0, 1, 2),
+                    (2, 1, 0, 1, 0, 0),
+                    (0, 1, 0, 0, 1, 2),
+                    (2, 1, 0, 0, 1, 0),
+                    (0, 1, 0, 0, 0, 1, 0),
+                ],
+                2: [
+                    (0, 0, 0, 2, 2, 0),
+                    (0, 2, 2, 0, 0, 0),
+                    (0, 0, 2, 0, 2, 1),
+                    (1, 2, 0, 2, 0, 0),
+                    (0, 2, 0, 0, 2, 1),
+                    (1, 2, 0, 0, 2, 0),
+                    (0, 2, 0, 0, 0, 2, 0),
+                ],
+            },
+        }
 
+        score = 0
         for line in self._split_board():
-            # 5+
-            # TODO: complete evaluate function
-            pass
+            for pattern in patterns.keys():
+                all_pattern = patterns[pattern][player]
+                for each in all_pattern:
+                    score += standards[pattern] * fit_pattern(line, each)
 
-        return 0
+        return score
 
     def _evaluate_point(self, point: Tuple[int, int]) -> int:
         """
