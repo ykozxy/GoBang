@@ -247,6 +247,7 @@ class Bar:
     def __init__(self, length: int):
         self.root = Tk()
         self.root.title("Ai calculating...")
+        self.root.resizable(width=FALSE, height=FALSE)
 
         Label(self.root, text="Plz wait for seconds, ai is calculating...").pack()
 

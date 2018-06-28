@@ -100,7 +100,7 @@ def points_gen(board: ChessBoard, distance: int = 2):
     final = []
     for x in range(15):
         for y in range(15):
-            if board.board[x][y] == 0 and has_neighbor(board, (x, y), distance):
+            if all((board.board[x][y] == 0, has_neighbor(board, (x, y), distance))):
                 final.append((x, y))
     return final
 
