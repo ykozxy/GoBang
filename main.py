@@ -1,7 +1,9 @@
+from collections import namedtuple
 from tkinter import *
 from tkinter.ttk import *
 from typing import Tuple, Union
 
+from ai import min_max_search
 from board import ChessBoard, format_number
 from constants import *
 
@@ -42,16 +44,18 @@ class ChessBoardInterface:
 
         # Create control frame
         self.controlFrame = Labelframe(self.root, text="Control Panel")
+        # Evaluate part
         self.score1 = Label(self.controlFrame, text="Black: ")
         self.score2 = Label(self.controlFrame, text="White: ")
-
         self.evaluateButton = Button(
             self.controlFrame, text="Evaluate", command=self.button_evaluate
         )
-
+        # AI part
+        self.aiCalculateButton = Button(self.controlFrame, text="AI Calculate (beta)", command=self.ai_calculate)
         self.score1.pack()
         self.score2.pack()
         self.evaluateButton.pack()
+        self.aiCalculateButton.pack()
 
         # Create Label frames
         self.horLabel = Frame(self.boardFrame)
@@ -66,6 +70,17 @@ class ChessBoardInterface:
         self.boardFrame.grid()
         # Some bugs here, cannot click canvas after click button....
         self.controlFrame.grid(row=0, column=1)
+
+    def ai_calculate(self):
+        """
+        Call min_max search in ai.py to find the best place to set chess
+        """
+        print("Perform AI Evaluate!")
+        position = min_max_search(self.chessBoard, self.chessBoard.next_turn, depth=6)
+        print(position)
+        position = self.convert_coordinate(position[0], position[1])
+        temp_coo = namedtuple("Coordinate", ['x', 'y'])
+        self.mouse_click(temp_coo(position[0], position[1]))
 
     def button_evaluate(self):
         """
@@ -255,3 +270,5 @@ if __name__ == "__main__":
             continue
         finally:
             break
+    # a = ChessBoard('p', 'p')
+    # print(a)

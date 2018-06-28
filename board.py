@@ -163,9 +163,11 @@ class ChessBoard:
                     return BLACK_WIN if self.board[x][y] == 1 else WHITE_WIN
 
         else:
-            raise ValueError(
-                "Judgement of total chessboard has not be implemented yet!"
-            )
+            for each in self._split_board():
+                if fit_pattern(each, (1, 1, 1, 1, 1)):
+                    return BLACK_WIN
+                elif fit_pattern(each, (2, 2, 2, 2, 2)):
+                    return WHITE_WIN
         return CONTINUE
 
     def get_board(self):
