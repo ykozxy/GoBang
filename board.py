@@ -24,6 +24,8 @@ def fit_pattern(sequence: list, pattern: tuple, margin_effect: bool = True) -> i
     if margin_effect:
         # If consider margin effect, add opposite player to the start end end of the sequence
         main_player = 0
+        if not isinstance(pattern, tuple):
+            print(f"{pattern}")
         for each in pattern:
             if each != 0:
                 main_player = each
@@ -271,101 +273,14 @@ class ChessBoard:
         :param player: 1 for black and 2 for white
         :return: Current situation. Bigger the outcome, more favourable the situation to the player
         """
-
-        standards = {
-            "5+": 100000,  # live 5
-            "4+": 10000,  # live 4
-            "3+": 1000,  # live 3
-            "2+": 100,  # live 2
-            "1+": 10,  # live 1
-            "4-": 1000,  # dead 4
-            "3-": 100,  # dead 3
-            "2-": 10,  # dead 2
-        }
-        # Store all patterns
-        # Usage: patterns[type][player] -> List[tuple]
-        patterns = {
-            "5+": {1: [(1, 1, 1, 1, 1)], 2: [(2, 2, 2, 2, 2)]},
-            "4+": {1: [(0, 1, 1, 1, 1, 0)], 2: [(0, 2, 2, 2, 2, 0)]},
-            "3+": {
-                1: [(0, 1, 1, 1, 0), (0, 1, 0, 1, 1, 0), (0, 1, 1, 0, 1, 0)],
-                2: [(0, 2, 2, 2, 0), (0, 2, 0, 2, 2, 0), (0, 2, 2, 0, 2, 0)],
-            },
-            "2+": {
-                1: [(0, 0, 1, 1, 0, 0), (0, 1, 0, 1, 0), (0, 1, 0, 0, 1, 0)],
-                2: [(0, 0, 2, 2, 0, 0), (0, 2, 0, 2, 0), (0, 2, 0, 0, 2, 0)],
-            },
-            "1+": {1: [(0, 1, 0)], 2: [(0, 2, 0)]},
-            "4-": {
-                1: [
-                    (0, 1, 1, 1, 1, 2),
-                    (2, 1, 1, 1, 1, 0),
-                    (1, 0, 1, 1, 1),
-                    (1, 1, 1, 0, 1),
-                    (1, 1, 0, 1, 1),
-                ],
-                2: [
-                    (0, 2, 2, 2, 2, 1),
-                    (1, 2, 2, 2, 2, 0),
-                    (2, 0, 2, 2, 2),
-                    (2, 2, 2, 0, 2),
-                    (2, 2, 0, 2, 2),
-                ],
-            },
-            "3-": {
-                1: [
-                    (0, 0, 1, 1, 1, 2),
-                    (2, 1, 1, 1, 0, 0),
-                    (0, 1, 0, 1, 1, 2),
-                    (2, 1, 1, 0, 1, 0),
-                    (0, 1, 1, 0, 1, 2),
-                    (2, 1, 0, 1, 1, 0),
-                    (1, 0, 0, 1, 1),
-                    (1, 1, 0, 0, 1),
-                    (1, 0, 1, 0, 1),
-                    (2, 0, 1, 1, 1, 0, 2),
-                ],
-                2: [
-                    (0, 0, 2, 2, 2, 1),
-                    (1, 2, 2, 2, 0, 0),
-                    (0, 2, 0, 2, 2, 1),
-                    (1, 2, 2, 0, 2, 0),
-                    (0, 2, 2, 0, 2, 1),
-                    (1, 2, 0, 2, 2, 0),
-                    (2, 0, 0, 2, 2),
-                    (2, 2, 0, 0, 2),
-                    (2, 0, 2, 0, 2),
-                    (1, 0, 2, 2, 2, 0, 1),
-                ],
-            },
-            "2-": {
-                1: [
-                    (0, 0, 0, 1, 1, 2),
-                    (2, 1, 1, 0, 0, 0),
-                    (0, 0, 1, 0, 1, 2),
-                    (2, 1, 0, 1, 0, 0),
-                    (0, 1, 0, 0, 1, 2),
-                    (2, 1, 0, 0, 1, 0),
-                    (1, 0, 0, 0, 1),
-                ],
-                2: [
-                    (0, 0, 0, 2, 2, 0),
-                    (0, 2, 2, 0, 0, 0),
-                    (0, 0, 2, 0, 2, 1),
-                    (1, 2, 0, 2, 0, 0),
-                    (0, 2, 0, 0, 2, 1),
-                    (1, 2, 0, 0, 2, 0),
-                    (2, 0, 0, 0, 2),
-                ],
-            },
-        }
-
         score = 0
         for line in self._split_board():
-            for pattern in patterns.keys():
-                all_pattern = patterns[pattern][player]
+            for pattern in PATTERNS.keys():
+                all_pattern = PATTERNS[pattern][player]
+                # print(all_pattern)
                 for each in all_pattern:
-                    score += standards[pattern] * fit_pattern(line, each)
+                    # print("    " + str(each))
+                    score += STANDARDS[pattern] * fit_pattern(line, each)
 
         return score
 

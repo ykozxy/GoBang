@@ -2,9 +2,10 @@ from random import sample, randint
 from typing import Tuple
 
 from board import ChessBoard
+from constants import *
 
 
-def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
+def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 6):
     """
     Min-max search to find the best place of setting chess
     :param control_bar: class Bar from main.py
@@ -23,7 +24,7 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
         break
     else:
         control_bar.exit()
-        return randint(5, 9), randint(5, 9)
+        return randint(6, 8), randint(6, 8)
 
     max_v = -99999999
     points = points_gen(board)
@@ -35,7 +36,7 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
 
         board.board[point[0]][point[1]] = ai_num
         cur_v = evaluate_point(
-            board, ai_num, 1 if ai_num == 2 else 2, depth, -999999999, 999999999
+            board, ai_num, 1 if ai_num == 2 else 2, depth, -9999999999, 9999999999
         )
         if cur_v == max_v:
             candidates.append(point)
@@ -48,6 +49,7 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 4):
     return result
 
 
+# TODO: Improve efficiency of function, there might have som issues with alpha beta pruning method
 def evaluate_point(
         board: ChessBoard, ai_num: int, player: int, depth: int, alpha: int, beta: int
 ):
@@ -63,13 +65,13 @@ def evaluate_point(
     """
     # Computer - Human
     v = board.evaluate(ai_num) - board.evaluate(1 if ai_num == 2 else 2)
-    if depth <= 0 or board.win_determine():
+    if depth <= 0 or board.win_determine() in [WHITE_WIN, BLACK_WIN, TIE]:
         return v
     points = points_gen(board)
 
     if player == ai_num:
         # Computer turn, max level
-        max_v = -99999999
+        max_v = -9999999999
         for point in points:
             board.board[point[0]][point[1]] = player
             cur_v = evaluate_point(

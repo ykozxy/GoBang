@@ -50,8 +50,8 @@ class ChessBoardInterface:
         self.turn = Label(self.controlFrame, text="Next player: black")
         self.turn.pack(pady=10)
         # Evaluate part
-        self.score1 = Label(self.controlFrame, text="Black: ")
-        self.score2 = Label(self.controlFrame, text="White: ")
+        self.score1 = Label(self.controlFrame, text="Black: 0")
+        self.score2 = Label(self.controlFrame, text="White: 0")
         self.evaluateButton = Button(
             self.controlFrame, text="Evaluate", command=self.button_evaluate
         )
@@ -61,8 +61,8 @@ class ChessBoardInterface:
         )
         self.score1.pack()
         self.score2.pack()
-        self.evaluateButton.pack()
-        self.aiCalculateButton.pack()
+        # self.evaluateButton.pack()
+        self.aiCalculateButton.pack(pady=10)
 
         # Create Label frames
         self.horLabel = Frame(self.boardFrame)
@@ -91,7 +91,7 @@ class ChessBoardInterface:
 
         bar = Bar(len(points_gen(self.chessBoard)))
         position = min_max_search(
-            self.chessBoard, self.chessBoard.next_turn, bar, depth=8
+            self.chessBoard, self.chessBoard.next_turn, bar, depth=6
         )
 
         print(position)
@@ -253,6 +253,8 @@ class ChessBoardInterface:
 
         # Delete picture
         self.mainBoard.delete(self.operate.pop())
+
+        self.button_evaluate()
 
 
 class Bar:
