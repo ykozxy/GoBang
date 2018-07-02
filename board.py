@@ -24,8 +24,6 @@ def fit_pattern(sequence: list, pattern: tuple, margin_effect: bool = True) -> i
     if margin_effect:
         # If consider margin effect, add opposite player to the start end end of the sequence
         main_player = 0
-        if not isinstance(pattern, tuple):
-            print(f"{pattern}")
         for each in pattern:
             if each != 0:
                 main_player = each

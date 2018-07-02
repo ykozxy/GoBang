@@ -1,4 +1,4 @@
-from random import sample, randint
+from random import sample
 from typing import Tuple
 
 from board import ChessBoard
@@ -24,7 +24,7 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 6):
         break
     else:
         control_bar.exit()
-        return randint(6, 8), randint(6, 8)
+        return 7, 7
 
     max_v = -99999999
     points = points_gen(board)
@@ -49,7 +49,7 @@ def min_max_search(board: ChessBoard, ai_num: int, control_bar, depth: int = 6):
     return result
 
 
-# TODO: Improve efficiency of function, there might have som issues with alpha beta pruning method
+# TODO: There are some issues with alpha beta pruning method
 def evaluate_point(
         board: ChessBoard, ai_num: int, player: int, depth: int, alpha: int, beta: int
 ):
@@ -71,7 +71,6 @@ def evaluate_point(
 
     if player == ai_num:
         # Computer turn, max level
-        max_v = -9999999999
         for point in points:
             board.board[point[0]][point[1]] = player
             cur_v = evaluate_point(
@@ -80,17 +79,17 @@ def evaluate_point(
                 1 if player == 2 else 2,
                 depth - 1,
                 alpha,
-                max(beta, max_v),
+                beta
             )
             board.board[point[0]][point[1]] = 0
-            max_v = max(max_v, cur_v)
+            alpha = max(alpha, cur_v)
             # Prune
-            if cur_v > alpha:
+            if beta < alpha:
+                print(f"Pruned {len(points) - points.index(point) - 1} nodes")
                 break
-        return max_v
+        return alpha
     else:
         # Human turn, min level
-        min_v = 9999999999
         for point in points:
             board.board[point[0]][point[1]] = player
             cur_v = evaluate_point(
@@ -98,15 +97,16 @@ def evaluate_point(
                 ai_num,
                 1 if player == 2 else 2,
                 depth - 1,
-                min(alpha, min_v),
-                beta,
+                alpha,
+                beta
             )
             board.board[point[0]][point[1]] = 0
-            min_v = min(min_v, cur_v)
+            beta = min(beta, cur_v)
             # Prune
-            if cur_v < beta:
+            if beta < alpha:
+                print(f"Pruned { len(points) - points.index(point) - 1} nodes")
                 break
-        return min_v
+        return beta
 
 
 def points_gen(board: ChessBoard, distance: int = 2):

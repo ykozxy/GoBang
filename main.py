@@ -91,7 +91,7 @@ class ChessBoardInterface:
 
         bar = Bar(len(points_gen(self.chessBoard)))
         position = min_max_search(
-            self.chessBoard, self.chessBoard.next_turn, bar, depth=6
+            self.chessBoard, self.chessBoard.next_turn, bar, depth=1
         )
 
         print(position)
