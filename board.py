@@ -1,6 +1,8 @@
 import copy
 from typing import List, Tuple, Union
 
+from core_algorithm.fit_pattern.fit_pattern import fit_pattern
+
 from constants import *
 
 
@@ -12,29 +14,24 @@ def format_number(num: int, format_length: int = 2) -> str:
         return out + str(num)
 
 
-def fit_pattern(sequence: list, pattern: tuple, margin_effect: bool = True) -> int:
+def fit_pattern_old(sequence: list, pattern: tuple, main_player: int, margin_effect: bool = True) -> int:
     """
     Find the number of patterns appear in sequence
+    :param main_player: Main player number in pattern
     :param margin_effect: Whether the margin of board will be consider as an obstacle when calculate
     :param sequence: The main sequence
     :param pattern: Pattern in the object sequence
     :return: The number of patterns appear in the sequence
     """
+    main_length = len(sequence)
+    sub_length = len(pattern)
+
     sequence = sequence[:]
     if margin_effect:
-        # If consider margin effect, add opposite player to the start end end of the sequence
-        main_player = 0
-        for each in pattern:
-            if each != 0:
-                main_player = each
-                break
-        assert main_player != 0  # Debug use
         add_player = 1 if main_player == 2 else 2
         sequence.insert(0, add_player)
         sequence.append(add_player)
 
-    main_length = len(sequence)
-    sub_length = len(pattern)
     if main_length < sub_length:
         return 0
     elif main_length == sub_length:
@@ -61,7 +58,7 @@ class ChessBoard:
 
         # Record all operations
         # Format: (player, (x, y))
-        self.operations: List[Tuple[int, Tuple(int, int)]] = []
+        self.operations = []
 
         # Currently, board size must be 15*15
         assert size == (15, 15), "Currently, board size must be 15*15"
@@ -71,9 +68,9 @@ class ChessBoard:
 
         # Set mode
         if p1 not in ["p", "c"]:
-            raise ValueError(f"Player must be 'p' or 'c', {p1} given!")
+            raise ValueError("Player must be 'p' or 'c', {} given!".format(p1))
         if p2 not in ["p", "c"]:
-            raise ValueError(f"Player must be 'p' or 'c', {p2} given!")
+            raise ValueError("Player must be 'p' or 'c', {} given!".format(p2))
         # Currently, there are three modes:
         # player vs. player, player vs. computer, computer vs. computer(this will turn into training process in future)
         self.mode = p1, p2
@@ -163,10 +160,10 @@ class ChessBoard:
                     return BLACK_WIN if self.board[x][y] == 1 else WHITE_WIN
 
         else:
-            for each in self._split_board():
-                if fit_pattern(each, (1, 1, 1, 1, 1)):
+            for each in self.split_board():
+                if fit_pattern(each, (1, 1, 1, 1, 1), 1):
                     return BLACK_WIN
-                elif fit_pattern(each, (2, 2, 2, 2, 2)):
+                elif fit_pattern(each, (2, 2, 2, 2, 2), 2):
                     return WHITE_WIN
         return CONTINUE
 
@@ -191,11 +188,11 @@ class ChessBoard:
         # Check input
         if x not in range(self.size[0]):
             raise ValueError(
-                f"X coordinate should be in range 0~{self.size[0]}, {x} given!"
+                "X coordinate should be in range 0~{}, {} given!".format(self.size[0], x)
             )
         if y not in range(self.size[1]):
             raise ValueError(
-                f"Y coordinate should be in range 0~{self.size[1]}, {y} given!"
+                "Y coordinate should be in range 0~{}, {} given!".format(self.size[1], y)
             )
 
         # Add operation to recorder
@@ -219,7 +216,7 @@ class ChessBoard:
             withdraw_times += 1
             if not self.operations:
                 raise ValueError(
-                    f"Stored {operation_length} operations, {withdraw_times} withdraw times given!"
+                    "Stored {} operations, {} withdraw times given!".format(operation_length, withdraw_times)
                 )
             withdraw_item = self.operations.pop()
             self.set_chess(withdraw_item[1][0], withdraw_item[1][1], reset=True)
@@ -239,7 +236,7 @@ class ChessBoard:
                 return False
         return True
 
-    def _split_board(self):
+    def split_board(self):
         """
         This generator split board vertically, horizontally and diagonally into one-dimension arrays
         :return: Yield all split arrays one by one
@@ -265,26 +262,28 @@ class ChessBoard:
             ]
 
     # Evaluate part
-    def evaluate(self, player: int) -> int:
+    @staticmethod
+    def evaluate(player: int, split_board: list) -> int:
         """
         Evaluate the situation on chessboard for one player, calculate an int as the result.
+        :param split_board: result list from self.split_board
         :param player: 1 for black and 2 for white
         :return: Current situation. Bigger the outcome, more favourable the situation to the player
         """
         score = 0
-        for line in self._split_board():
+        for line in split_board:
             for pattern in PATTERNS.keys():
                 all_pattern = PATTERNS[pattern][player]
                 # print(all_pattern)
                 for each in all_pattern:
                     # print("    " + str(each))
-                    score += STANDARDS[pattern] * fit_pattern(line, each)
-
+                    score += STANDARDS[pattern] * fit_pattern(line, each, player)
         return score
 
-    def _evaluate_point(self, point: Tuple[int, int]) -> int:
+    def evaluate_point(self, point: Tuple[int, int], player: int) -> int:
         """
         Evaluate the score of a specific point in the board
+        :param player: 1 for black and 2 fr white
         :param point: Coordinate of the point
         :return: Score of the point
         """
@@ -296,12 +295,12 @@ class ChessBoard:
         out = "   "
         for x in range(self.size[0]):
             temp_x = format_number(x)
-            out += f"{temp_x} "
+            out += "{} ".format(temp_x)
         out += "\n"
         for y in range(self.size[0]):
             temp_y = format_number(y)
-            out += f"{temp_y}"
+            out += "{}".format(temp_y)
             for x in range(self.size[1]):
-                out += f"  {str(self.board[x][y])}"
+                out += "  {}".format(str(self.board[x][y]))
             out += "\n"
         return out

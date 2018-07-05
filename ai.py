@@ -64,7 +64,8 @@ def evaluate_point(
     :return: the maximum score of the position
     """
     # Computer - Human
-    v = board.evaluate(ai_num) - board.evaluate(1 if ai_num == 2 else 2)
+    split_board = list(board.split_board())
+    v = board.evaluate(ai_num, split_board) - board.evaluate(1 if ai_num == 2 else 2, split_board)
     if depth <= 0 or board.win_determine() in [WHITE_WIN, BLACK_WIN, TIE]:
         return v
     points = points_gen(board)
@@ -85,7 +86,7 @@ def evaluate_point(
             alpha = max(alpha, cur_v)
             # Prune
             if beta < alpha:
-                print(f"Pruned {len(points) - points.index(point) - 1} nodes")
+                print("Pruned {} nodes".format(len(points) - points.index(point) - 1))
                 break
         return alpha
     else:
@@ -104,7 +105,7 @@ def evaluate_point(
             beta = min(beta, cur_v)
             # Prune
             if beta < alpha:
-                print(f"Pruned { len(points) - points.index(point) - 1} nodes")
+                print("Pruned {} nodes".format(len(points) - points.index(point) - 1))
                 break
         return beta
 

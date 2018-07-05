@@ -110,8 +110,9 @@ class ChessBoardInterface:
         if self.button_freeze:
             return
         print("Perform evaluate!")
-        self.score1["text"] = "Black: {}".format(self.chessBoard.evaluate(1))
-        self.score2["text"] = "White: {}".format(self.chessBoard.evaluate(2))
+        split = list(self.chessBoard.split_board())
+        self.score1["text"] = "Black: {}".format(self.chessBoard.evaluate(1, split))
+        self.score2["text"] = "White: {}".format(self.chessBoard.evaluate(2, split))
         self.root.update()
 
     def mouse_click(self, click):
@@ -133,7 +134,7 @@ class ChessBoardInterface:
         else:
             color = "White"
         new_position = self.convert_coordinate(x, y)
-        print(f"{color} chess at position({new_position[0]}, {new_position[1]})")
+        print("{} chess at position({}, {})".format(color, new_position[0], new_position[1]))
         self.operate.append(
             self.mainBoard.create_oval(
                 x - chess_size,
