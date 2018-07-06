@@ -1,7 +1,7 @@
 import copy
 from typing import List, Tuple, Union
 
-from core_algorithm.fit_pattern.fit_pattern import fit_pattern
+from core_algorithm.algorithms import fit_pattern
 
 from constants import *
 
@@ -280,14 +280,6 @@ class ChessBoard:
                     score += STANDARDS[pattern] * fit_pattern(line, each, player)
         return score
 
-    def evaluate_point(self, point: Tuple[int, int], player: int) -> int:
-        """
-        Evaluate the score of a specific point in the board
-        :param player: 1 for black and 2 fr white
-        :param point: Coordinate of the point
-        :return: Score of the point
-        """
-
     def __repr__(self):
         """
         Should output x and y reversely, since they are stored differently in self.board
@@ -304,3 +296,9 @@ class ChessBoard:
                 out += "  {}".format(str(self.board[x][y]))
             out += "\n"
         return out
+
+    def __hash__(self):
+        temp = []
+        for each in self.board:
+            temp.append(tuple(each))
+        return hash(tuple(temp))

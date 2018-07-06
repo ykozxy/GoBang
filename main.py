@@ -89,9 +89,9 @@ class ChessBoardInterface:
         self.chessBoard.freeze = True
         self.button_freeze = True
 
-        bar = Bar(len(points_gen(self.chessBoard)))
+        bar = Bar(len(points_gen(self.chessBoard, self.chessBoard.next_turn)))
         position = min_max_search(
-            self.chessBoard, self.chessBoard.next_turn, bar, depth=1
+            self.chessBoard, self.chessBoard.next_turn, bar, depth=2
         )
 
         print(position)
@@ -109,7 +109,7 @@ class ChessBoardInterface:
         """
         if self.button_freeze:
             return
-        print("Perform evaluate!")
+        print("Perform evaluate_point!")
         split = list(self.chessBoard.split_board())
         self.score1["text"] = "Black: {}".format(self.chessBoard.evaluate(1, split))
         self.score2["text"] = "White: {}".format(self.chessBoard.evaluate(2, split))
