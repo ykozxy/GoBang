@@ -134,7 +134,11 @@ class ChessBoardInterface:
         else:
             color = "White"
         new_position = self.convert_coordinate(x, y)
-        print("{} chess at position({}, {})".format(color, new_position[0], new_position[1]))
+        print(
+            "{} chess at position({}, {})".format(
+                color, new_position[0], new_position[1]
+            )
+        )
         self.operate.append(
             self.mainBoard.create_oval(
                 x - chess_size,

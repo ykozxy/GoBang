@@ -69,7 +69,9 @@ def search_point(
     """
     # Computer - Human
     split_board = list(board.split_board())
-    v = board.evaluate(ai_num, split_board) - board.evaluate(1 if ai_num == 2 else 2, split_board)
+    v = board.evaluate(ai_num, split_board) - board.evaluate(
+        1 if ai_num == 2 else 2, split_board
+    )
     if depth <= 0 or board.win_determine() in [WHITE_WIN, BLACK_WIN, TIE]:
         return v
     points = points_gen(board, player)
@@ -79,18 +81,13 @@ def search_point(
         for point in points:
             board.board[point[0]][point[1]] = player
             cur_v = search_point(
-                board,
-                ai_num,
-                1 if player == 2 else 2,
-                depth - 1,
-                alpha,
-                beta
+                board, ai_num, 1 if player == 2 else 2, depth - 1, alpha, beta
             )
             board.board[point[0]][point[1]] = 0
             alpha = max(alpha, cur_v)
             # Prune
             if beta < alpha:
-                print("Pruned {} nodes".format(len(points) - points.index(point) - 1))
+                # print("Pruned {} nodes".format(len(points) - points.index(point) - 1))
                 break
         return alpha
     else:
@@ -98,12 +95,7 @@ def search_point(
         for point in points:
             board.board[point[0]][point[1]] = player
             cur_v = search_point(
-                board,
-                ai_num,
-                1 if player == 2 else 2,
-                depth - 1,
-                alpha,
-                beta
+                board, ai_num, 1 if player == 2 else 2, depth - 1, alpha, beta
             )
             board.board[point[0]][point[1]] = 0
             beta = min(beta, cur_v)

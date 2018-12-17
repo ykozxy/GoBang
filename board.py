@@ -14,7 +14,9 @@ def format_number(num: int, format_length: int = 2) -> str:
         return out + str(num)
 
 
-def fit_pattern_old(sequence: list, pattern: tuple, main_player: int, margin_effect: bool = True) -> int:
+def fit_pattern_old(
+        sequence: list, pattern: tuple, main_player: int, margin_effect: bool = True
+) -> int:
     """
     Find the number of patterns appear in sequence
     :param main_player: Main player number in pattern
@@ -188,11 +190,15 @@ class ChessBoard:
         # Check input
         if x not in range(self.size[0]):
             raise ValueError(
-                "X coordinate should be in range 0~{}, {} given!".format(self.size[0], x)
+                "X coordinate should be in range 0~{}, {} given!".format(
+                    self.size[0], x
+                )
             )
         if y not in range(self.size[1]):
             raise ValueError(
-                "Y coordinate should be in range 0~{}, {} given!".format(self.size[1], y)
+                "Y coordinate should be in range 0~{}, {} given!".format(
+                    self.size[1], y
+                )
             )
 
         # Add operation to recorder
@@ -216,7 +222,9 @@ class ChessBoard:
             withdraw_times += 1
             if not self.operations:
                 raise ValueError(
-                    "Stored {} operations, {} withdraw times given!".format(operation_length, withdraw_times)
+                    "Stored {} operations, {} withdraw times given!".format(
+                        operation_length, withdraw_times
+                    )
                 )
             withdraw_item = self.operations.pop()
             self.set_chess(withdraw_item[1][0], withdraw_item[1][1], reset=True)
@@ -278,7 +286,18 @@ class ChessBoard:
                 for each in all_pattern:
                     # print("    " + str(each))
                     score += STANDARDS[pattern] * fit_pattern(line, each, player)
+        # print(time.time() - t)
         return score
+
+    @staticmethod
+    def evaluate_point(board, point: tuple, player: int) -> int:
+        """
+        Evaluate the score of a specific point in the board
+        :param board: ChessBoard object
+        :param point: 1 for black and 2 for white
+        :param player: coordinate of the point
+        :return: score of the point
+        """
 
     def __repr__(self):
         """

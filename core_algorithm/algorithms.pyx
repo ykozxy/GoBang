@@ -31,11 +31,12 @@ def fit_pattern(list sequence, tuple pattern, int main_player, margin_effect = T
                 count += 1
         return count
 
+
 def evaluate_point(board, tuple point, int player):
     """
     Evaluate the score of a specific point in the board
     :param board: Chessboard object
-    :param player: 1 for black and 2 fr white
+    :param player: 1 for black and 2 for white
     :param point: Coordinate of the point
     :return: Score of the point
     """
